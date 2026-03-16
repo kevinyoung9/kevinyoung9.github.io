@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>大學入學考倒數</title>
+  <style>
+    :root {
+      --bg1: #0f172a;
+      --bg2: #1e293b;
+      --card: rgba(255, 255, 255, 0.12);
+      --text: #f8fafc;
+      --muted: #cbd5e1;
+      --accent: #38bdf8;
+      --accent2: #22c55e;
+      --shadow: 0 10px 30px rgba(0,0,0,0.25);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", "Microsoft JhengHei", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, #1d4ed8 0%, transparent 35%),
+        radial-gradient(circle at bottom right, #059669 0%, transparent 30%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .card {
+      background: var(--card);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 32px 24px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 700;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: clamp(14px, 2vw, 18px);
+      margin-bottom: 26px;
+    }
+
+    .target-date {
+      display: inline-block;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.10);
+      color: #e2e8f0;
+      margin-bottom: 24px;
+      font-size: 15px;
+    }
+
+    .count-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-top: 16px;
+    }
+
+    .count-box {
+      background: rgba(255,255,255,0.10);
+      border-radius: 18px;
+      padding: 24px 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .count-number {
+      font-size: clamp(34px, 6vw, 64px);
+      font-weight: 800;
+      line-height: 1.1;
+      color: #ffffff;
+      letter-spacing: 1px;
+    }
+
+    .count-label {
+      margin-top: 10px;
+      font-size: 16px;
+      color: var(--muted);
+    }
+
+    .days-only {
+      display: none;
+      margin-top: 18px;
+    }
+
+    .days-total {
+      font-size: clamp(48px, 9vw, 88px);
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.1;
+    }
+
+    .days-text {
+      color: var(--muted);
+      font-size: 18px;
+      margin-top: 10px;
+    }
+
+    .controls {
+      margin-top: 28px;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      appearance: none;
+      border: none;
+      cursor: pointer;
+      padding: 12px 18px;
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: 700;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+      box-shadow: var(--shadow);
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #082f49;
+    }
+
+    .btn-secondary {
+      background: var(--accent2);
+      color: #052e16;
+    }
+
+    .footer {
+      margin-top: 20px;
+      color: #dbeafe;
+      font-size: 14px;
+      opacity: 0.92;
+    }
+
+    .expired {
+      margin-top: 16px;
+      font-size: 22px;
+      font-weight: 700;
+      color: #fde68a;
+    }
+
+    @media (max-width: 700px) {
+      .count-grid {
+        grid-template-columns: 1fr;
+      }
+      .card {
+        padding: 24px 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>大學入學考倒數</h1>
+      <div class="subtitle">一起陪孩子穩穩走到 2029 年 7 月 1 日</div>
+
+      <div class="target-date">目標日期：2029 / 07 / 01 00:00:00</div>
+
+      <div id="ymdView">
+        <div class="count-grid">
+          <div class="count-box">
+            <div class="count-number" id="years">0</div>
+            <div class="count-label">年</div>
+          </div>
+          <div class="count-box">
+            <div class="count-number" id="months">0</div>
+            <div class="count-label">月</div>
+          </div>
+          <div class="count-box">
+            <div class="count-number" id="days">0</div>
+            <div class="count-label">日</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="daysOnlyView" class="days-only">
+        <div class="count-box">
+          <div class="days-total" id="totalDays">0</div>
+          <div class="days-text">距離考試還有的總天數</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn-primary" onclick="showYMD()">顯示 年 / 月 / 日</button>
+        <button class="btn-secondary" onclick="showTotalDays()">顯示 總天數</button>
+      </div>
+
+      <div id="expiredMessage" class="expired" style="display:none;">
+        考試日期已到，祝孩子考試順利、金榜題名！
+      </div>
+
+      <div class="footer" id="nowText"></div>
+    </div>
+  </div>
+
+  <script>
+    const targetDate = new Date(2029, 6, 1, 0, 0, 0); // 月份從 0 開始，6 = 7月
+
+    function addMonths(date, months) {
+      const d = new Date(date.getTime());
+      const originalDate = d.getDate();
+      d.setMonth(d.getMonth() + months);
+
+      // 避免 1/31 + 1 個月變成 3/3 這類問題
+      if (d.getDate() < originalDate) {
+        d.setDate(0);
+      }
+      return d;
+    }
+
+    function calculateYMDDiff(fromDate, toDate) {
+      if (fromDate >= toDate) {
+        return { years: 0, months: 0, days: 0 };
+      }
+
+      let years = toDate.getFullYear() - fromDate.getFullYear();
+      let months = toDate.getMonth() - fromDate.getMonth();
+      let days = toDate.getDate() - fromDate.getDate();
+
+      if (days < 0) {
+        months--;
+        const prevMonth = new Date(toDate.getFullYear(), toDate.getMonth(), 0);
+        days += prevMonth.getDate();
+      }
+
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
+
+      // 再用校正法確保更穩
+      let cursor = new Date(fromDate.getTime());
+      cursor.setHours(0, 0, 0, 0);
+
+      let totalMonths = 0;
+      while (true) {
+        const next = addMonths(cursor, 1);
+        if (next <= toDate) {
+          cursor = next;
+          totalMonths++;
+        } else {
+          break;
+        }
+      }
+
+      years = Math.floor(totalMonths / 12);
+      months = totalMonths % 12;
+
+      const msPerDay = 24 * 60 * 60 * 1000;
+      const cursorDay = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate());
+      const targetDay = new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate());
+      days = Math.floor((targetDay - cursorDay) / msPerDay);
+
+      return { years, months, days };
+    }
+
+    function updateCountdown() {
+      const now = new Date();
+
+      document.getElementById("nowText").textContent =
+        "現在時間：" + now.getFullYear() + "/" +
+        String(now.getMonth() + 1).padStart(2, "0") + "/" +
+        String(now.getDate()).padStart(2, "0") + " " +
+        String(now.getHours()).padStart(2, "0") + ":" +
+        String(now.getMinutes()).padStart(2, "0") + ":" +
+        String(now.getSeconds()).padStart(2, "0");
+
+      if (now >= targetDate) {
+        document.getElementById("years").textContent = 0;
+        document.getElementById("months").textContent = 0;
+        document.getElementById("days").textContent = 0;
+        document.getElementById("totalDays").textContent = 0;
+        document.getElementById("expiredMessage").style.display = "block";
+        return;
+      }
+
+      const diff = calculateYMDDiff(now, targetDate);
+      document.getElementById("years").textContent = diff.years;
+      document.getElementById("months").textContent = diff.months;
+      document.getElementById("days").textContent = diff.days;
+
+      const msDiff = targetDate - now;
+      const totalDays = Math.ceil(msDiff / (1000 * 60 * 60 * 24));
+      document.getElementById("totalDays").textContent = totalDays;
+    }
+
+    function showYMD() {
+      document.getElementById("ymdView").style.display = "block";
+      document.getElementById("daysOnlyView").style.display = "none";
+    }
+
+    function showTotalDays() {
+      document.getElementById("ymdView").style.display = "none";
+      document.getElementById("daysOnlyView").style.display = "block";
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  </script>
+</body>
+</html>
