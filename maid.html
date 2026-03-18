@@ -248,6 +248,7 @@
       font-size: 28px;
       font-weight: bold;
       color: #224b98;
+      word-break: break-word;
     }
 
     .progress-wrap {
@@ -346,6 +347,32 @@
         <div class="muted">快速查看今天、昨天與最近 7 天的完成率。</div>
       </div>
 
+      <div class="card">
+        <h3>Cookie 使用量</h3>
+        <div class="dash-grid">
+          <div class="dash-box">
+            <div class="dash-title">Used</div>
+            <div class="dash-value" id="cookieUsedBox">0 B</div>
+            <div class="muted" id="cookieUsedText">目前資料大小</div>
+          </div>
+
+          <div class="dash-box">
+            <div class="dash-title">Free</div>
+            <div class="dash-value" id="cookieFreeBox">0 B</div>
+            <div class="muted" id="cookieFreeText">預估剩餘空間</div>
+          </div>
+
+          <div class="dash-box">
+            <div class="dash-title">Usage</div>
+            <div class="dash-value" id="cookieUsageBox">0%</div>
+            <div class="muted" id="cookieUsageText">以 4096 bytes 為估算上限</div>
+            <div class="progress-wrap">
+              <div id="cookieUsageBar" class="progress-bar" style="width:0%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="dash-grid">
         <div class="card dash-box">
           <div class="dash-title">今天完成率</div>
@@ -383,10 +410,11 @@
   <div class="version-badge" id="appVersionLabel"></div>
 
   <script>
-    const APP_VERSION = "v3";
+    const APP_VERSION = "v4";
     const VERSION_COOKIE = "maidAppVersion";
     const COOKIE_NAME = "maidDailyReport";
     const COOKIE_EXPIRE_DAYS = 365;
+    const COOKIE_LIMIT_BYTES = 4096;
 
     const TASKS = [
       { id: 1, name: "整理客廳", start: "08:00", end: "09:00" },
@@ -507,6 +535,29 @@
       }
 
       setCookie(COOKIE_NAME, json, COOKIE_EXPIRE_DAYS);
+    }
+
+    function getCookieValueSizeBytes(name) {
+      const raw = getCookie(name);
+      if (!raw) return 0;
+      return encodeURIComponent(raw).length;
+    }
+
+    function formatBytes(bytes) {
+      if (bytes < 1024) return bytes + " B";
+      return (bytes / 1024).toFixed(2) + " KB";
+    }
+
+    function getCookieUsageInfo() {
+      const used = getCookieValueSizeBytes(COOKIE_NAME);
+      const free = Math.max(COOKIE_LIMIT_BYTES - used, 0);
+      const usage = Math.min(Math.round((used / COOKIE_LIMIT_BYTES) * 100), 100);
+
+      return {
+        used: used,
+        free: free,
+        usage: usage
+      };
     }
 
     function createEmptyDayRecord() {
@@ -770,6 +821,30 @@
       });
     }
 
+    function renderCookieUsage() {
+      const info = getCookieUsageInfo();
+
+      const usedBox = document.getElementById("cookieUsedBox");
+      const freeBox = document.getElementById("cookieFreeBox");
+      const usageBox = document.getElementById("cookieUsageBox");
+      const usedText = document.getElementById("cookieUsedText");
+      const freeText = document.getElementById("cookieFreeText");
+      const usageText = document.getElementById("cookieUsageText");
+      const usageBar = document.getElementById("cookieUsageBar");
+
+      if (!usedBox || !freeBox || !usageBox || !usedText || !freeText || !usageText || !usageBar) {
+        return;
+      }
+
+      usedBox.textContent = formatBytes(info.used);
+      freeBox.textContent = formatBytes(info.free);
+      usageBox.textContent = info.usage + "%";
+      usedText.textContent = "目前 " + COOKIE_NAME + " 大小";
+      freeText.textContent = "預估尚可使用空間";
+      usageText.textContent = "以 " + COOKIE_LIMIT_BYTES + " bytes 為估算上限";
+      usageBar.style.width = info.usage + "%";
+    }
+
     function renderDashboard() {
       const todayKey = getDateKeyByOffset(0);
       const yesterdayKey = getDateKeyByOffset(-1);
@@ -808,6 +883,7 @@
 
       if (keys.length === 0) {
         history.innerHTML = '<div class="muted">尚無資料</div>';
+        renderCookieUsage();
         return;
       }
 
@@ -827,6 +903,8 @@
         `;
         history.appendChild(row);
       });
+
+      renderCookieUsage();
     }
 
     function setActiveTab(tabId) {
