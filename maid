@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>女傭每日回報系統</title>
+  <style>
+    body {
+      font-family: Arial, "Microsoft JhengHei", sans-serif;
+      margin: 0;
+      background: #f7f7f7;
+      color: #222;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1, h2, h3 {
+      margin-top: 0;
+    }
+
+    .topbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    button, .tab-btn {
+      border: none;
+      background: #2d6cdf;
+      color: white;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:hover, .tab-btn:hover {
+      opacity: 0.9;
+    }
+
+    .tab-btn.secondary {
+      background: #666;
+    }
+
+    .tab-btn.active {
+      background: #0b4bb3;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .task-row {
+      display: grid;
+      grid-template-columns: 1fr 140px 150px 150px;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .task-row:last-child {
+      border-bottom: none;
+    }
+
+    .task-name {
+      font-weight: bold;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .status.done {
+      background: #dff5e3;
+      color: #1a7a31;
+    }
+
+    .status.undone {
+      background: #fff0d9;
+      color: #9a5a00;
+    }
+
+    .status.locked {
+      background: #ececec;
+      color: #666;
+    }
+
+    .task-btn {
+      background: #28a745;
+      color: #fff;
+      padding: 9px 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .task-btn:disabled {
+      background: #bdbdbd;
+      cursor: not-allowed;
+    }
+
+    .note {
+      font-size: 13px;
+      color: #666;
+      margin-top: 8px;
+    }
+
+    .summary-item {
+      border-left: 5px solid #2d6cdf;
+      padding-left: 12px;
+      margin-bottom: 14px;
+    }
+
+    .summary-date {
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .summary-desc {
+      margin: 6px 0 10px;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+
+    .mini-list {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .ok {
+      color: #157c2f;
+    }
+
+    .no {
+      color: #b53b2f;
+    }
+
+    .footer-note {
+      margin-top: 20px;
+      color: #666;
+      font-size: 13px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 100px;
+      resize: vertical;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    .muted {
+      color: #777;
+      font-size: 13px;
+    }
+
+    .today-info {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .badge {
+      background: #eef4ff;
+      color: #1f4ea0;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+    }
+
+    @media (max-width: 768px) {
+      .task-row {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>女傭每日回報系統</h1>
+
+    <div class="topbar">
+      <button id="tabToday" class="tab-btn active">今日作業</button>
+      <button id="tabSummary" class="tab-btn secondary">每日摘要</button>
+    </div>
+
+    <div id="todayPage">
+      <div class="card">
+        <div class="today-info">
+          <div class="badge" id="todayDateLabel"></div>
+          <div class="badge" id="currentTimeLabel"></div>
+        </div>
+        <div class="note">
+          規則：只有在指定時段內，才可以把項目從「未完成」點成「已完成」；完成後即鎖定，不可改回。
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>今日 8 項工作</h2>
+        <div id="taskList"></div>
+      </div>
+
+      <div class="card">
+        <h2>今日摘要說明</h2>
+        <textarea id="dailyDesc" placeholder="例如：今天已完成客廳清潔、洗衣、晚餐準備。下午 15:00 完成浴室消毒。"></textarea>
+        <div style="margin-top:10px;">
+          <button id="saveDescBtn">儲存今日摘要</button>
+        </div>
+        <div class="note">
+          此摘要會跟今天的 8 項狀態一起保存到 cookie，保存期限 1 年。
+        </div>
+      </div>
+    </div>
+
+    <div id="summaryPage" style="display:none;">
+      <div class="card">
+        <h2>每日摘要列表</h2>
+        <div class="muted">日期新的在上面，例如昨天會排在前面。</div>
+      </div>
+      <div id="summaryList"></div>
+    </div>
+
+    <div class="footer-note">
+      注意：此版本使用 cookie，瀏覽器 cookie 容量有限。若歷史資料很多，系統會自動刪除最舊資料，避免 cookie 爆掉。
+    </div>
+  </div>
+
+  <script>
+    /**********************
+     * 1) 基本設定
+     **********************/
+    const TASKS = [
+      { id: 1, name: "整理客廳", start: "08:00", end: "09:00" },
+      { id: 2, name: "打掃臥室", start: "09:00", end: "10:00" },
+      { id: 3, name: "清潔浴室", start: "10:00", end: "11:00" },
+      { id: 4, name: "洗衣與晾衣", start: "11:00", end: "12:00" },
+      { id: 5, name: "午餐準備", start: "13:00", end: "14:00" },
+      { id: 6, name: "廚房清潔", start: "14:00", end: "15:00" },
+      { id: 7, name: "晚餐備料", start: "16:00", end: "17:00" },
+      { id: 8, name: "垃圾整理與丟棄", start: "19:00", end: "20:00" }
+    ];
+
+    const COOKIE_NAME = "maidDailyReport";
+    const COOKIE_EXPIRE_DAYS = 365;
+
+    /**********************
+     * 2) cookie 工具
+     **********************/
+    function setCookie(name, value, days) {
+      const date = new Date();
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+      const expires = "expires=" + date.toUTCString();
+      document.cookie = name + "=" + encodeURIComponent(value) + ";" + expires + ";path=/;SameSite=Lax";
+    }
+
+    function getCookie(name) {
+      const target = name + "=";
+      const arr = document.cookie.split(";");
+      for (let c of arr) {
+        c = c.trim();
+        if (c.indexOf(target) === 0) {
+          return decodeURIComponent(c.substring(target.length));
+        }
+      }
+      return null;
+    }
+
+    /**********************
+     * 3) 日期/時間工具
+     **********************/
+    function pad2(n) {
+      return String(n).padStart(2, "0");
+    }
+
+    function getTodayKey() {
+      const now = new Date();
+      return `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`;
+    }
+
+    function formatDateText(dateKey) {
+      const d = new Date(dateKey + "T00:00:00");
+      const weekNames = ["日", "一", "二", "三", "四", "五", "六"];
+      return `${d.getFullYear()}/${pad2(d.getMonth() + 1)}/${pad2(d.getDate())} (週${weekNames[d.getDay()]})`;
+    }
+
+    function getCurrentHHMM() {
+      const now = new Date();
+      return `${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
+    }
+
+    function hhmmToMinutes(hhmm) {
+      const [h, m] = hhmm.split(":").map(Number);
+      return h * 60 + m;
+    }
+
+    function isInTimeRange(nowHHMM, startHHMM, endHHMM) {
+      const now = hhmmToMinutes(nowHHMM);
+      const start = hhmmToMinutes(startHHMM);
+      const end = hhmmToMinutes(endHHMM);
+      return now >= start && now <= end;
+    }
+
+    /**********************
+     * 4) 資料讀寫
+     * 結構：
+     * {
+     *   "2026-03-18": {
+     *      desc: "...",
+     *      tasks: { "1": true, "2": false ... }
+     *   }
+     * }
+     **********************/
+    function loadAllData() {
+      const raw = getCookie(COOKIE_NAME);
+      if (!raw) return {};
+      try {
+        const obj = JSON.parse(raw);
+        if (obj && typeof obj === "object") return obj;
+        return {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function saveAllData(data) {
+      let json = JSON.stringify(data);
+
+      // cookie 太大時，自動刪除最舊的日期資料
+      // 一般瀏覽器單一 cookie 大約 4KB 左右，這裡保守控制
+      while (json.length > 3500) {
+        const keys = Object.keys(data).sort(); // 舊的在前
+        if (keys.length === 0) break;
+        delete data[keys[0]];
+        json = JSON.stringify(data);
+      }
+
+      setCookie(COOKIE_NAME, json, COOKIE_EXPIRE_DAYS);
+    }
+
+    function ensureTodayRecord() {
+      const data = loadAllData();
+      const today = getTodayKey();
+
+      if (!data[today]) {
+        data[today] = {
+          desc: "",
+          tasks: {}
+        };
+        TASKS.forEach(t => {
+          data[today].tasks[String(t.id)] = false;
+        });
+        saveAllData(data);
+      } else {
+        // 若舊資料缺欄位，補上
+        if (!data[today].tasks) data[today].tasks = {};
+        TASKS.forEach(t => {
+          if (typeof data[today].tasks[String(t.id)] !== "boolean") {
+            data[today].tasks[String(t.id)] = false;
+          }
+        });
+        if (typeof data[today].desc !== "string") {
+          data[today].desc = "";
+        }
+        saveAllData(data);
+      }
+    }
+
+    function markTaskDone(taskId) {
+      const data = loadAllData();
+      const today = getTodayKey();
+      const record = data[today];
+      if (!record) return;
+
+      const task = TASKS.find(t => t.id === taskId);
+      if (!task) return;
+
+      const nowHHMM = getCurrentHHMM();
+
+      if (record.tasks[String(taskId)] === true) {
+        alert("此項目已完成並鎖定，不能改回。");
+        return;
+      }
+
+      if (!isInTimeRange(nowHHMM, task.start, task.end)) {
+        alert(`現在不是可操作時段。\n此項目只能在 ${task.start} ~ ${task.end} 點擊完成。`);
+        return;
+      }
+
+      record.tasks[String(taskId)] = true;
+      saveAllData(data);
+      renderToday();
+      renderSummary();
+    }
+
+    function saveTodayDesc() {
+      const data = loadAllData();
+      const today = getTodayKey();
+      if (!data[today]) return;
+
+      data[today].desc = document.getElementById("dailyDesc").value.trim();
+      saveAllData(data);
+      alert("今日摘要已儲存。");
+      renderSummary();
+    }
+
+    /**********************
+     * 5) UI Render
+     **********************/
+    function renderToday() {
+      ensureTodayRecord();
+
+      const today = getTodayKey();
+      const nowHHMM = getCurrentHHMM();
+      const data = loadAllData();
+      const record = data[today];
+
+      document.getElementById("todayDateLabel").textContent = "今天：" + formatDateText(today);
+      document.getElementById("currentTimeLabel").textContent = "目前時間：" + nowHHMM;
+
+      document.getElementById("dailyDesc").value = record.desc || "";
+
+      const taskList = document.getElementById("taskList");
+      taskList.innerHTML = "";
+
+      TASKS.forEach(task => {
+        const done = record.tasks[String(task.id)] === true;
+        const inRange = isInTimeRange(nowHHMM, task.start, task.end);
+
+        let statusHtml = "";
+        let buttonDisabled = false;
+        let noteText = "";
+
+        if (done) {
+          statusHtml = `<span class="status done">已完成（已鎖定）</span>`;
+          buttonDisabled = true;
+          noteText = "此項目已完成，不可再修改";
+        } else {
+          if (inRange) {
+            statusHtml = `<span class="status undone">未完成（可點擊）</span>`;
+            buttonDisabled = false;
+            noteText = `現在在可操作時段 ${task.start} ~ ${task.end}`;
+          } else {
+            statusHtml = `<span class="status locked">未完成（未到或已過時段）</span>`;
+            buttonDisabled = true;
+            noteText = `只能在 ${task.start} ~ ${task.end} 點擊完成`;
+          }
+        }
+
+        const row = document.createElement("div");
+        row.className = "task-row";
+        row.innerHTML = `
+          <div>
+            <div class="task-name">${task.id}. ${task.name}</div>
+            <div class="muted">時段：${task.start} ~ ${task.end}</div>
+          </div>
+          <div>${statusHtml}</div>
+          <div class="muted">${noteText}</div>
+          <div>
+            <button class="task-btn" ${buttonDisabled ? "disabled" : ""} data-task-id="${task.id}">
+              完成
+            </button>
+          </div>
+        `;
+        taskList.appendChild(row);
+      });
+
+      document.querySelectorAll(".task-btn").forEach(btn => {
+        btn.addEventListener("click", function () {
+          const taskId = Number(this.getAttribute("data-task-id"));
+          markTaskDone(taskId);
+        });
+      });
+    }
+
+    function renderSummary() {
+      const data = loadAllData();
+      const keys = Object.keys(data).sort((a, b) => b.localeCompare(a)); // 新的在上面
+      const summaryList = document.getElementById("summaryList");
+      summaryList.innerHTML = "";
+
+      if (keys.length === 0) {
+        summaryList.innerHTML = `<div class="card">尚無資料</div>`;
+        return;
+      }
+
+      keys.forEach(dateKey => {
+        const record = data[dateKey];
+        const doneCount = TASKS.filter(t => record.tasks && record.tasks[String(t.id)] === true).length;
+
+        const card = document.createElement("div");
+        card.className = "card summary-item";
+
+        let taskHtml = `<ul class="mini-list">`;
+        TASKS.forEach(task => {
+          const done = record.tasks && record.tasks[String(task.id)] === true;
+          taskHtml += `<li class="${done ? 'ok' : 'no'}">${task.name}：${done ? '已完成' : '未完成'}</li>`;
+        });
+        taskHtml += `</ul>`;
+
+        card.innerHTML = `
+          <div class="summary-date">${formatDateText(dateKey)}</div>
+          <div>完成數：<strong>${doneCount} / ${TASKS.length}</strong></div>
+          <div class="summary-desc">${record.desc ? record.desc : "（無摘要說明）"}</div>
+          ${taskHtml}
+        `;
+        summaryList.appendChild(card);
+      });
+    }
+
+    /**********************
+     * 6) 分頁切換
+     **********************/
+    function showTodayPage() {
+      document.getElementById("todayPage").style.display = "";
+      document.getElementById("summaryPage").style.display = "none";
+      document.getElementById("tabToday").classList.add("active");
+      document.getElementById("tabToday").classList.remove("secondary");
+      document.getElementById("tabSummary").classList.remove("active");
+      document.getElementById("tabSummary").classList.add("secondary");
+    }
+
+    function showSummaryPage() {
+      document.getElementById("todayPage").style.display = "none";
+      document.getElementById("summaryPage").style.display = "";
+      document.getElementById("tabSummary").classList.add("active");
+      document.getElementById("tabSummary").classList.remove("secondary");
+      document.getElementById("tabToday").classList.remove("active");
+      document.getElementById("tabToday").classList.add("secondary");
+    }
+
+    /**********************
+     * 7) 初始化
+     **********************/
+    document.getElementById("tabToday").addEventListener("click", showTodayPage);
+    document.getElementById("tabSummary").addEventListener("click", showSummaryPage);
+    document.getElementById("saveDescBtn").addEventListener("click", saveTodayDesc);
+
+    ensureTodayRecord();
+    renderToday();
+    renderSummary();
+
+    // 每分鐘刷新一次，讓按鈕可否點擊狀態跟著時間更新
+    setInterval(() => {
+      renderToday();
+    }, 60000);
+  </script>
+</body>
+</html>
