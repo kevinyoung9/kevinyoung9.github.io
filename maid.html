@@ -1,114 +1,395 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>女傭每日回報系統</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>女傭每日回報系統</title>
+  <style>
+    body {
+      font-family: Arial, "Microsoft JhengHei", sans-serif;
+      margin: 0;
+      background: #f6f7fb;
+      color: #222;
+    }
 
-<style>
-body {
-  font-family: Arial, "Microsoft JhengHei";
-  background: #f6f7fb;
-  margin: 0;
-}
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 20px;
+    }
 
-.container {
-  max-width: 980px;
-  margin: auto;
-  padding: 20px;
-}
+    h1, h2, h3 {
+      margin-top: 0;
+    }
 
-.card {
-  background: white;
-  padding: 16px;
-  margin-bottom: 14px;
-  border-radius: 12px;
-}
+    .topbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
 
-.task-row {
-  display: grid;
-  grid-template-columns: 1fr 120px 140px;
-  gap: 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid #eee;
-}
+    .tab-btn, .normal-btn {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 14px;
+      cursor: pointer;
+    }
 
-.task-btn {
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-  font-weight: bold;
-}
+    .tab-btn {
+      background: #5c6f91;
+      color: #fff;
+    }
 
-.btn-pending {
-  background: #bbb;
-  color: white;
-}
+    .tab-btn.active {
+      background: #2d6cdf;
+    }
 
-.btn-open {
-  background: #f3c742;
-}
+    .normal-btn {
+      background: #2d6cdf;
+      color: #fff;
+    }
 
-.btn-done {
-  background: #28a745;
-  color: white;
-}
+    .normal-btn:hover,
+    .tab-btn:hover {
+      opacity: 0.92;
+    }
 
-.version-badge {
-  position: fixed;
-  bottom: 10px;
-  right: 10px;
-  background: #2d6cdf;
-  color: white;
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-}
-</style>
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .today-info {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .badge {
+      background: #eef4ff;
+      color: #224b98;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+    }
+
+    .note {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .muted {
+      color: #777;
+      font-size: 13px;
+    }
+
+    .task-row {
+      display: grid;
+      grid-template-columns: 1.3fr 140px 170px 150px;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #ececec;
+    }
+
+    .task-row:last-child {
+      border-bottom: none;
+    }
+
+    .task-name {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .status-pending {
+      background: #ececec;
+      color: #666;
+    }
+
+    .status-open {
+      background: #fff1c6;
+      color: #8a6200;
+    }
+
+    .status-done {
+      background: #dff5e3;
+      color: #1a7a31;
+    }
+
+    .task-btn {
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: none;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .btn-pending {
+      background: #bdbdbd;
+      color: white;
+      cursor: not-allowed;
+    }
+
+    .btn-open {
+      background: #f3c742;
+      color: #222;
+      cursor: pointer;
+    }
+
+    .btn-open:hover {
+      opacity: 0.92;
+    }
+
+    .btn-done {
+      background: #28a745;
+      color: white;
+      cursor: not-allowed;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      box-sizing: border-box;
+      resize: vertical;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .summary-item {
+      border-left: 5px solid #2d6cdf;
+      padding-left: 12px;
+    }
+
+    .summary-date {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .summary-desc {
+      white-space: pre-wrap;
+      line-height: 1.6;
+      margin: 8px 0 10px;
+    }
+
+    .mini-list {
+      margin: 0;
+      padding-left: 18px;
+      line-height: 1.7;
+    }
+
+    .ok {
+      color: #157c2f;
+    }
+
+    .no {
+      color: #b53b2f;
+    }
+
+    .footer-note {
+      font-size: 12px;
+      color: #666;
+      margin-top: 18px;
+      line-height: 1.6;
+    }
+
+    .version-badge {
+      position: fixed;
+      bottom: 10px;
+      right: 12px;
+      background: #2d6cdf;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .dash-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .dash-box {
+      background: #f8fbff;
+      border: 1px solid #dce8ff;
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .dash-title {
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 8px;
+    }
+
+    .dash-value {
+      font-size: 28px;
+      font-weight: bold;
+      color: #224b98;
+    }
+
+    .progress-wrap {
+      height: 14px;
+      background: #ececec;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: #2d6cdf;
+    }
+
+    .history-row {
+      display: grid;
+      grid-template-columns: 180px 100px 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .history-row:last-child {
+      border-bottom: none;
+    }
+
+    @media (max-width: 768px) {
+      .task-row,
+      .history-row,
+      .dash-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .version-badge {
+        bottom: 8px;
+        right: 8px;
+      }
+    }
+  </style>
 </head>
-
 <body>
-<div class="container">
+  <div class="container">
+    <h1>女傭每日回報系統</h1>
 
-<h1>女傭每日回報</h1>
+    <div class="topbar">
+      <button id="tabToday" class="tab-btn active">今日作業</button>
+      <button id="tabSummary" class="tab-btn">每日摘要</button>
+      <button id="tabDashboard" class="tab-btn">主管 Dashboard</button>
+    </div>
 
-<div class="card">
-<div id="taskList"></div>
-</div>
+    <div id="todayPage">
+      <div class="card">
+        <div class="today-info">
+          <div class="badge" id="todayDateLabel"></div>
+          <div class="badge" id="currentTimeLabel"></div>
+        </div>
+        <div class="note">
+          規則：<br>
+          1. 未到時段：顯示「未完成」，不能點。<br>
+          2. 時段內且未點：顯示「完成」，黃色可點。<br>
+          3. 一旦點擊完成：顯示「已完成」，立即鎖定，不可改回。<br>
+          4. 時段過後若未點：顯示「未完成」，鎖定。
+        </div>
+      </div>
 
-<div class="card">
-<h3>今日摘要</h3>
-<textarea id="dailyDesc" style="width:100%"></textarea>
-<br><br>
-<button onclick="saveDesc()">儲存</button>
-</div>
+      <div class="card">
+        <h2>今日 8 項工作</h2>
+        <div id="taskList"></div>
+      </div>
 
-<div class="card">
-<h3>摘要列表</h3>
-<div id="summary"></div>
-</div>
+      <div class="card">
+        <h2>今日摘要說明</h2>
+        <textarea id="dailyDesc" placeholder="例如：今天已完成客廳、浴室、洗衣，下午 13:25 完成午餐準備。"></textarea>
+        <div style="margin-top:10px;">
+          <button id="saveDescBtn" class="normal-btn">儲存今日摘要</button>
+        </div>
+        <div class="note" style="margin-top:8px;">
+          今日摘要與 8 項狀態會一起保存到 cookie，保存 1 年。
+        </div>
+      </div>
+    </div>
 
-</div>
+    <div id="summaryPage" style="display:none;">
+      <div class="card">
+        <h2>每日摘要列表</h2>
+        <div class="muted">日期新的排在上面，例如昨天會比前天更前面。</div>
+      </div>
+      <div id="summaryList"></div>
+    </div>
 
-<div class="version-badge" id="appVersionLabel"></div>
+    <div id="dashboardPage" style="display:none;">
+      <div class="card">
+        <h2>主管 Dashboard</h2>
+        <div class="muted">快速查看今天、昨天與最近 7 天的完成率。</div>
+      </div>
 
-<script>
+      <div class="dash-grid">
+        <div class="card dash-box">
+          <div class="dash-title">今天完成率</div>
+          <div class="dash-value" id="todayRateBox">0%</div>
+          <div class="muted" id="todayRateText">0 / 8</div>
+          <div class="progress-wrap"><div id="todayRateBar" class="progress-bar" style="width:0%;"></div></div>
+        </div>
 
-/*******************
- VERSION CONTROL
-*******************/
-const APP_VERSION = "v2";  // ⭐改這裡即可清cookie
-const VERSION_COOKIE = "maidAppVersion";
+        <div class="card dash-box">
+          <div class="dash-title">昨天完成率</div>
+          <div class="dash-value" id="yesterdayRateBox">0%</div>
+          <div class="muted" id="yesterdayRateText">0 / 8</div>
+          <div class="progress-wrap"><div id="yesterdayRateBar" class="progress-bar" style="width:0%;"></div></div>
+        </div>
 
-/*******************
- CONFIG
-*******************/
-const COOKIE_NAME = "maidData";
-const EXPIRE = 365;
+        <div class="card dash-box">
+          <div class="dash-title">最近 7 天平均完成率</div>
+          <div class="dash-value" id="avg7RateBox">0%</div>
+          <div class="muted" id="avg7RateText">共 0 天資料</div>
+          <div class="progress-wrap"><div id="avg7RateBar" class="progress-bar" style="width:0%;"></div></div>
+        </div>
+      </div>
 
-const TASKS = [
+      <div class="card">
+        <h3>每日完成率明細</h3>
+        <div id="dashboardHistory"></div>
+      </div>
+    </div>
 
-{ id: 1, name: "整理客廳", start: "08:00", end: "09:00" },
+    <div class="footer-note">
+      注意：本版本依你的要求使用 cookie。由於 cookie 容量有限，若歷史資料太多，系統會自動刪除最舊日期資料，以避免超過瀏覽器限制。
+    </div>
+  </div>
+
+  <div class="version-badge" id="appVersionLabel"></div>
+
+  <script>
+    const APP_VERSION = "v3";
+    const VERSION_COOKIE = "maidAppVersion";
+    const COOKIE_NAME = "maidDailyReport";
+    const COOKIE_EXPIRE_DAYS = 365;
+
+    const TASKS = [
+      { id: 1, name: "整理客廳", start: "08:00", end: "09:00" },
 { id: 2, name: "打掃臥室", start: "09:00", end: "10:00" },
 { id: 3, name: "清潔浴室", start: "10:00", end: "11:00" },
 { id: 4, name: "整理隨身碟", start: "13:00", end: "23:59" },
@@ -116,186 +397,482 @@ const TASKS = [
 { id: 6, name: "遛狗", start: "14:00", end: "23:59" },
 { id: 7, name: "晚餐備料", start: "17:00", end: "23:59" },
 { id: 8, name: "整理床鋪", start: "21:00", end: "23:59" }
+    ];
 
-];
+    function setCookie(name, value, days) {
+      const date = new Date();
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+      const expires = "expires=" + date.toUTCString();
+      document.cookie = name + "=" + encodeURIComponent(value) + ";" + expires + ";path=/;SameSite=Lax";
+    }
 
-/*******************
- COOKIE
-*******************/
-function setCookie(name,value,days){
-let d=new Date();
-d.setTime(d.getTime()+days*86400000);
-document.cookie=name+"="+encodeURIComponent(value)+";expires="+d.toUTCString()+";path=/";
-}
+    function getCookie(name) {
+      const target = name + "=";
+      const arr = document.cookie.split(";");
+      for (let c of arr) {
+        c = c.trim();
+        if (c.indexOf(target) === 0) {
+          return decodeURIComponent(c.substring(target.length));
+        }
+      }
+      return null;
+    }
 
-function getCookie(name){
-let n=name+"=";
-let arr=document.cookie.split(";");
-for(let c of arr){
-c=c.trim();
-if(c.indexOf(n)==0) return decodeURIComponent(c.substring(n.length));
-}
-return null;
-}
+    function clearCookie(name) {
+      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
+    }
 
-function clearCookie(name){
-document.cookie=name+"=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
-}
+    function checkVersionAndReset() {
+      const savedVersion = getCookie(VERSION_COOKIE);
+      if (savedVersion !== APP_VERSION) {
+        clearCookie(COOKIE_NAME);
+        setCookie(VERSION_COOKIE, APP_VERSION, COOKIE_EXPIRE_DAYS);
+        alert("系統已更新，舊資料已清除（版本：" + APP_VERSION + "）");
+      }
+    }
 
-/*******************
- VERSION CHECK
-*******************/
-function checkVersion(){
-let v=getCookie(VERSION_COOKIE);
-if(v!==APP_VERSION){
-clearCookie(COOKIE_NAME);
-setCookie(VERSION_COOKIE,APP_VERSION,EXPIRE);
-alert("系統更新，已清除舊資料");
-}
-}
+    function pad2(n) {
+      return String(n).padStart(2, "0");
+    }
 
-/*******************
- TIME
-*******************/
-function nowHHMM(){
-let d=new Date();
-return d.getHours()*60+d.getMinutes();
-}
+    function getTodayKey() {
+      const now = new Date();
+      return now.getFullYear() + "-" + pad2(now.getMonth() + 1) + "-" + pad2(now.getDate());
+    }
 
-function toMin(t){
-let [h,m]=t.split(":");
-return Number(h)*60+Number(m);
-}
+    function getDateKeyByOffset(offsetDays) {
+      const d = new Date();
+      d.setDate(d.getDate() + offsetDays);
+      return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+    }
 
-/*******************
- DATA
-*******************/
-function load(){
-let d=getCookie(COOKIE_NAME);
-return d?JSON.parse(d):{};
-}
+    function formatDateText(dateKey) {
+      const d = new Date(dateKey + "T00:00:00");
+      const weekNames = ["日", "一", "二", "三", "四", "五", "六"];
+      return d.getFullYear() + "/" + pad2(d.getMonth() + 1) + "/" + pad2(d.getDate()) + " (週" + weekNames[d.getDay()] + ")";
+    }
 
-function save(d){
-setCookie(COOKIE_NAME,JSON.stringify(d),EXPIRE);
-}
+    function getCurrentHHMM() {
+      const now = new Date();
+      return pad2(now.getHours()) + ":" + pad2(now.getMinutes());
+    }
 
-function today(){
-let d=new Date();
-return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
-}
+    function getCurrentHHMMSS() {
+      const now = new Date();
+      return pad2(now.getHours()) + ":" + pad2(now.getMinutes()) + ":" + pad2(now.getSeconds());
+    }
 
-/*******************
- CORE
-*******************/
-function markDone(id){
-let data=load();
-let t=today();
+    function hhmmToMinutes(hhmm) {
+      const parts = hhmm.split(":");
+      const h = Number(parts[0]);
+      const m = Number(parts[1]);
+      return h * 60 + m;
+    }
 
-if(!data[t]) return;
+    function isInTimeRange(nowHHMM, startHHMM, endHHMM) {
+      const now = hhmmToMinutes(nowHHMM);
+      const start = hhmmToMinutes(startHHMM);
+      const end = hhmmToMinutes(endHHMM);
+      return now >= start && now <= end;
+    }
 
-let now=nowHHMM();
-let task=TASKS.find(x=>x.id==id);
+    function isBeforeTimeRange(nowHHMM, startHHMM) {
+      return hhmmToMinutes(nowHHMM) < hhmmToMinutes(startHHMM);
+    }
 
-if(data[t][id]?.done) return;
+    function isAfterTimeRange(nowHHMM, endHHMM) {
+      return hhmmToMinutes(nowHHMM) > hhmmToMinutes(endHHMM);
+    }
 
-if(now<toMin(task.start)||now>toMin(task.end)){
-alert("不在時間內");
-return;
-}
+    function loadAllData() {
+      const raw = getCookie(COOKIE_NAME);
+      if (!raw) return {};
+      try {
+        const obj = JSON.parse(raw);
+        if (obj && typeof obj === "object") return obj;
+        return {};
+      } catch (e) {
+        return {};
+      }
+    }
 
-data[t][id]={done:true,time:new Date().toLocaleTimeString()};
-save(data);
-render();
-}
+    function saveAllData(data) {
+      let json = JSON.stringify(data);
 
-/*******************
- RENDER
-*******************/
-function render(){
+      while (json.length > 3500) {
+        const keys = Object.keys(data).sort();
+        if (keys.length === 0) break;
+        delete data[keys[0]];
+        json = JSON.stringify(data);
+      }
 
-let data=load();
-let t=today();
+      setCookie(COOKIE_NAME, json, COOKIE_EXPIRE_DAYS);
+    }
 
-if(!data[t]){
-data[t]={};
-TASKS.forEach(x=>data[t][x.id]={done:false});
-save(data);
-}
+    function createEmptyDayRecord() {
+      const tasks = {};
+      TASKS.forEach(function(task) {
+        tasks[String(task.id)] = {
+          done: false,
+          completedAt: ""
+        };
+      });
+      return {
+        desc: "",
+        tasks: tasks
+      };
+    }
 
-let html="";
+    function ensureTodayRecord() {
+      const data = loadAllData();
+      const today = getTodayKey();
 
-TASKS.forEach(task=>{
-let state=data[t][task.id];
-let now=nowHHMM();
+      if (!data[today]) {
+        data[today] = createEmptyDayRecord();
+        saveAllData(data);
+        return;
+      }
 
-let text="未完成";
-let cls="btn-pending";
-let disabled=true;
+      if (typeof data[today].desc !== "string") {
+        data[today].desc = "";
+      }
 
-if(state.done){
-text="已完成";
-cls="btn-done";
-}
-else if(now>=toMin(task.start)&&now<=toMin(task.end)){
-text="完成";
-cls="btn-open";
-disabled=false;
-}
+      if (!data[today].tasks || typeof data[today].tasks !== "object") {
+        data[today].tasks = {};
+      }
 
-html+=`
-<div class="task-row">
-<div>${task.name}<br>${task.start}-${task.end}</div>
-<div>
-<button class="task-btn ${cls}" ${disabled?"disabled":""}
-onclick="markDone(${task.id})">${text}</button>
-</div>
-</div>`;
-});
+      TASKS.forEach(function(task) {
+        const key = String(task.id);
+        const item = data[today].tasks[key];
 
-document.getElementById("taskList").innerHTML=html;
+        if (!item || typeof item !== "object") {
+          data[today].tasks[key] = {
+            done: false,
+            completedAt: ""
+          };
+        } else {
+          if (typeof item.done !== "boolean") item.done = false;
+          if (typeof item.completedAt !== "string") item.completedAt = "";
+        }
+      });
 
-renderSummary();
-}
+      saveAllData(data);
+    }
 
-/*******************
- SUMMARY
-*******************/
-function saveDesc(){
-let data=load();
-let t=today();
-if(!data[t]) data[t]={};
+    function getTaskState(dayRecord, taskId) {
+      const item = dayRecord.tasks[String(taskId)];
+      if (!item) {
+        return {
+          done: false,
+          completedAt: ""
+        };
+      }
+      return item;
+    }
 
-data[t].desc=document.getElementById("dailyDesc").value;
-save(data);
-renderSummary();
-}
+    function markTaskDone(taskId) {
+      const data = loadAllData();
+      const today = getTodayKey();
+      const record = data[today];
+      if (!record) return;
 
-function renderSummary(){
-let data=load();
-let keys=Object.keys(data).reverse();
+      const task = TASKS.find(function(t) { return t.id === taskId; });
+      if (!task) return;
 
-let html="";
+      const nowHHMM = getCurrentHHMM();
+      const taskState = getTaskState(record, taskId);
 
-keys.forEach(k=>{
-let d=data[k];
-html+=`<div class="card">
-<b>${k}</b><br>
-${d.desc||""}
-</div>`;
-});
+      if (taskState.done === true) {
+        alert("此項目已完成並鎖定，不能改回。");
+        return;
+      }
 
-document.getElementById("summary").innerHTML=html;
-}
+      if (!isInTimeRange(nowHHMM, task.start, task.end)) {
+        alert("現在不是可操作時段。\n此項目只能在 " + task.start + " ~ " + task.end + " 點擊完成。");
+        return;
+      }
 
-/*******************
- INIT
-*******************/
-checkVersion();
+      record.tasks[String(taskId)] = {
+        done: true,
+        completedAt: getCurrentHHMMSS()
+      };
 
-document.getElementById("appVersionLabel").innerText="v"+APP_VERSION;
+      saveAllData(data);
+      renderToday();
+      renderSummary();
+      renderDashboard();
+    }
 
-render();
+    function saveTodayDesc() {
+      const data = loadAllData();
+      const today = getTodayKey();
 
-</script>
+      if (!data[today]) return;
+
+      data[today].desc = document.getElementById("dailyDesc").value.trim();
+      saveAllData(data);
+      alert("今日摘要已儲存。");
+      renderSummary();
+      renderDashboard();
+    }
+
+    function getDayCompletionInfo(dateKey) {
+      const data = loadAllData();
+      const record = data[dateKey];
+      if (!record || !record.tasks) {
+        return {
+          doneCount: 0,
+          total: TASKS.length,
+          rate: 0
+        };
+      }
+
+      let doneCount = 0;
+      TASKS.forEach(function(task) {
+        const item = getTaskState(record, task.id);
+        if (item.done) doneCount++;
+      });
+
+      return {
+        doneCount: doneCount,
+        total: TASKS.length,
+        rate: Math.round((doneCount / TASKS.length) * 100)
+      };
+    }
+
+    function renderToday() {
+      ensureTodayRecord();
+
+      const today = getTodayKey();
+      const nowHHMM = getCurrentHHMM();
+      const data = loadAllData();
+      const record = data[today];
+
+      document.getElementById("todayDateLabel").textContent = "今天：" + formatDateText(today);
+      document.getElementById("currentTimeLabel").textContent = "目前時間：" + nowHHMM;
+      document.getElementById("dailyDesc").value = record.desc || "";
+
+      const taskList = document.getElementById("taskList");
+      taskList.innerHTML = "";
+
+      TASKS.forEach(function(task) {
+        const taskState = getTaskState(record, task.id);
+        const done = taskState.done === true;
+        const beforeRange = isBeforeTimeRange(nowHHMM, task.start);
+        const inRange = isInTimeRange(nowHHMM, task.start, task.end);
+        const afterRange = isAfterTimeRange(nowHHMM, task.end);
+
+        let statusClass = "status-pending";
+        let statusText = "未完成";
+        let buttonClass = "btn-pending";
+        let buttonText = "未完成";
+        let buttonDisabled = true;
+        let noteText = "";
+
+        if (done) {
+          statusClass = "status-done";
+          statusText = "已完成";
+          buttonClass = "btn-done";
+          buttonText = "已完成";
+          buttonDisabled = true;
+          noteText = taskState.completedAt ? ("完成時間：" + taskState.completedAt) : "已完成並鎖定";
+        } else {
+          if (beforeRange) {
+            statusClass = "status-pending";
+            statusText = "未到時段";
+            buttonClass = "btn-pending";
+            buttonText = "未完成";
+            buttonDisabled = true;
+            noteText = "可操作時段：" + task.start + " ~ " + task.end;
+          } else if (inRange) {
+            statusClass = "status-open";
+            statusText = "進行中";
+            buttonClass = "btn-open";
+            buttonText = "完成";
+            buttonDisabled = false;
+            noteText = "現在可點擊完成：" + task.start + " ~ " + task.end;
+          } else if (afterRange) {
+            statusClass = "status-pending";
+            statusText = "已過時段";
+            buttonClass = "btn-pending";
+            buttonText = "未完成";
+            buttonDisabled = true;
+            noteText = "已超過時段：" + task.start + " ~ " + task.end;
+          }
+        }
+
+        const row = document.createElement("div");
+        row.className = "task-row";
+        row.innerHTML = `
+          <div>
+            <div class="task-name">${task.id}. ${task.name}</div>
+            <div class="muted">時段：${task.start} ~ ${task.end}</div>
+          </div>
+          <div><span class="status ${statusClass}">${statusText}</span></div>
+          <div class="muted">${noteText}</div>
+          <div>
+            <button class="task-btn ${buttonClass}" ${buttonDisabled ? "disabled" : ""} data-task-id="${task.id}">
+              ${buttonText}
+            </button>
+          </div>
+        `;
+        taskList.appendChild(row);
+      });
+
+      document.querySelectorAll(".task-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          const taskId = Number(this.getAttribute("data-task-id"));
+          markTaskDone(taskId);
+        });
+      });
+    }
+
+    function renderSummary() {
+      const data = loadAllData();
+      const keys = Object.keys(data).sort(function(a, b) {
+        return b.localeCompare(a);
+      });
+
+      const summaryList = document.getElementById("summaryList");
+      summaryList.innerHTML = "";
+
+      if (keys.length === 0) {
+        summaryList.innerHTML = '<div class="card">尚無資料</div>';
+        return;
+      }
+
+      keys.forEach(function(dateKey) {
+        const record = data[dateKey];
+        const info = getDayCompletionInfo(dateKey);
+
+        let taskHtml = '<ul class="mini-list">';
+        TASKS.forEach(function(task) {
+          const item = getTaskState(record, task.id);
+          if (item.done) {
+            taskHtml += '<li class="ok">' + task.name + '：已完成' +
+              (item.completedAt ? '（' + item.completedAt + '）' : '') +
+              '</li>';
+          } else {
+            taskHtml += '<li class="no">' + task.name + '：未完成</li>';
+          }
+        });
+        taskHtml += '</ul>';
+
+        const card = document.createElement("div");
+        card.className = "card summary-item";
+        card.innerHTML = `
+          <div class="summary-date">${formatDateText(dateKey)}</div>
+          <div>完成數：<strong>${info.doneCount} / ${info.total}</strong>（${info.rate}%）</div>
+          <div class="summary-desc">${record.desc ? record.desc : "（無摘要說明）"}</div>
+          ${taskHtml}
+        `;
+        summaryList.appendChild(card);
+      });
+    }
+
+    function renderDashboard() {
+      const todayKey = getDateKeyByOffset(0);
+      const yesterdayKey = getDateKeyByOffset(-1);
+
+      const todayInfo = getDayCompletionInfo(todayKey);
+      const yesterdayInfo = getDayCompletionInfo(yesterdayKey);
+
+      document.getElementById("todayRateBox").textContent = todayInfo.rate + "%";
+      document.getElementById("todayRateText").textContent = todayInfo.doneCount + " / " + todayInfo.total;
+      document.getElementById("todayRateBar").style.width = todayInfo.rate + "%";
+
+      document.getElementById("yesterdayRateBox").textContent = yesterdayInfo.rate + "%";
+      document.getElementById("yesterdayRateText").textContent = yesterdayInfo.doneCount + " / " + yesterdayInfo.total;
+      document.getElementById("yesterdayRateBar").style.width = yesterdayInfo.rate + "%";
+
+      const data = loadAllData();
+      const keys = Object.keys(data).sort(function(a, b) {
+        return b.localeCompare(a);
+      });
+
+      let sumRate = 0;
+      let countDays = 0;
+      for (let i = 0; i < keys.length && i < 7; i++) {
+        const info = getDayCompletionInfo(keys[i]);
+        sumRate += info.rate;
+        countDays++;
+      }
+
+      const avg7 = countDays > 0 ? Math.round(sumRate / countDays) : 0;
+      document.getElementById("avg7RateBox").textContent = avg7 + "%";
+      document.getElementById("avg7RateText").textContent = "共 " + countDays + " 天資料";
+      document.getElementById("avg7RateBar").style.width = avg7 + "%";
+
+      const history = document.getElementById("dashboardHistory");
+      history.innerHTML = "";
+
+      if (keys.length === 0) {
+        history.innerHTML = '<div class="muted">尚無資料</div>';
+        return;
+      }
+
+      keys.forEach(function(dateKey) {
+        const info = getDayCompletionInfo(dateKey);
+        const row = document.createElement("div");
+        row.className = "history-row";
+        row.innerHTML = `
+          <div><strong>${formatDateText(dateKey)}</strong></div>
+          <div>${info.doneCount} / ${info.total}</div>
+          <div>
+            <div class="progress-wrap">
+              <div class="progress-bar" style="width:${info.rate}%;"></div>
+            </div>
+            <div class="muted" style="margin-top:4px;">完成率 ${info.rate}%</div>
+          </div>
+        `;
+        history.appendChild(row);
+      });
+    }
+
+    function setActiveTab(tabId) {
+      document.getElementById("tabToday").classList.remove("active");
+      document.getElementById("tabSummary").classList.remove("active");
+      document.getElementById("tabDashboard").classList.remove("active");
+      document.getElementById(tabId).classList.add("active");
+    }
+
+    function showTodayPage() {
+      document.getElementById("todayPage").style.display = "";
+      document.getElementById("summaryPage").style.display = "none";
+      document.getElementById("dashboardPage").style.display = "none";
+      setActiveTab("tabToday");
+    }
+
+    function showSummaryPage() {
+      document.getElementById("todayPage").style.display = "none";
+      document.getElementById("summaryPage").style.display = "";
+      document.getElementById("dashboardPage").style.display = "none";
+      setActiveTab("tabSummary");
+    }
+
+    function showDashboardPage() {
+      document.getElementById("todayPage").style.display = "none";
+      document.getElementById("summaryPage").style.display = "none";
+      document.getElementById("dashboardPage").style.display = "";
+      setActiveTab("tabDashboard");
+    }
+
+    document.getElementById("tabToday").addEventListener("click", showTodayPage);
+    document.getElementById("tabSummary").addEventListener("click", showSummaryPage);
+    document.getElementById("tabDashboard").addEventListener("click", showDashboardPage);
+    document.getElementById("saveDescBtn").addEventListener("click", saveTodayDesc);
+
+    checkVersionAndReset();
+    ensureTodayRecord();
+    document.getElementById("appVersionLabel").textContent = "版本：" + APP_VERSION;
+    renderToday();
+    renderSummary();
+    renderDashboard();
+
+    setInterval(function() {
+      renderToday();
+      renderDashboard();
+    }, 60000);
+  </script>
 </body>
 </html>
