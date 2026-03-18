@@ -1,569 +1,301 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>女傭每日回報系統</title>
-  <style>
-    body {
-      font-family: Arial, "Microsoft JhengHei", sans-serif;
-      margin: 0;
-      background: #f7f7f7;
-      color: #222;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>女傭每日回報系統</title>
 
-    .container {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 20px;
-    }
+<style>
+body {
+  font-family: Arial, "Microsoft JhengHei";
+  background: #f6f7fb;
+  margin: 0;
+}
 
-    h1, h2, h3 {
-      margin-top: 0;
-    }
+.container {
+  max-width: 980px;
+  margin: auto;
+  padding: 20px;
+}
 
-    .topbar {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
+.card {
+  background: white;
+  padding: 16px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+}
 
-    button, .tab-btn {
-      border: none;
-      background: #2d6cdf;
-      color: white;
-      padding: 10px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-    }
+.task-row {
+  display: grid;
+  grid-template-columns: 1fr 120px 140px;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
 
-    button:hover, .tab-btn:hover {
-      opacity: 0.9;
-    }
+.task-btn {
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  font-weight: bold;
+}
 
-    .tab-btn.secondary {
-      background: #666;
-    }
+.btn-pending {
+  background: #bbb;
+  color: white;
+}
 
-    .tab-btn.active {
-      background: #0b4bb3;
-    }
+.btn-open {
+  background: #f3c742;
+}
 
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 14px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
+.btn-done {
+  background: #28a745;
+  color: white;
+}
 
-    .task-row {
-      display: grid;
-      grid-template-columns: 1fr 140px 150px 150px;
-      gap: 10px;
-      align-items: center;
-      padding: 12px 0;
-      border-bottom: 1px solid #eee;
-    }
-
-    .task-row:last-child {
-      border-bottom: none;
-    }
-
-    .task-name {
-      font-weight: bold;
-    }
-
-    .status {
-      display: inline-block;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 13px;
-      text-align: center;
-    }
-
-    .status.done {
-      background: #dff5e3;
-      color: #1a7a31;
-    }
-
-    .status.undone {
-      background: #fff0d9;
-      color: #9a5a00;
-    }
-
-    .status.locked {
-      background: #ececec;
-      color: #666;
-    }
-
-    .task-btn {
-      background: #28a745;
-      color: #fff;
-      padding: 9px 12px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    .task-btn:disabled {
-      background: #bdbdbd;
-      cursor: not-allowed;
-    }
-
-    .note {
-      font-size: 13px;
-      color: #666;
-      margin-top: 8px;
-    }
-
-    .summary-item {
-      border-left: 5px solid #2d6cdf;
-      padding-left: 12px;
-      margin-bottom: 14px;
-    }
-
-    .summary-date {
-      font-weight: bold;
-      font-size: 16px;
-      margin-bottom: 8px;
-    }
-
-    .summary-desc {
-      margin: 6px 0 10px;
-      white-space: pre-wrap;
-      line-height: 1.5;
-    }
-
-    .mini-list {
-      margin: 0;
-      padding-left: 18px;
-    }
-
-    .ok {
-      color: #157c2f;
-    }
-
-    .no {
-      color: #b53b2f;
-    }
-
-    .footer-note {
-      margin-top: 20px;
-      color: #666;
-      font-size: 13px;
-    }
-
-    textarea {
-      width: 100%;
-      min-height: 100px;
-      resize: vertical;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 10px;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
-
-    .muted {
-      color: #777;
-      font-size: 13px;
-    }
-
-    .today-info {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-
-    .badge {
-      background: #eef4ff;
-      color: #1f4ea0;
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-size: 13px;
-    }
-
-    @media (max-width: 768px) {
-      .task-row {
-        grid-template-columns: 1fr;
-        gap: 6px;
-      }
-    }
-  </style>
+.version-badge {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  background: #2d6cdf;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+</style>
 </head>
+
 <body>
-  <div class="container">
-    <h1>女傭每日回報系統</h1>
+<div class="container">
 
-    <div class="topbar">
-      <button id="tabToday" class="tab-btn active">今日作業</button>
-      <button id="tabSummary" class="tab-btn secondary">每日摘要</button>
-    </div>
+<h1>女傭每日回報</h1>
 
-    <div id="todayPage">
-      <div class="card">
-        <div class="today-info">
-          <div class="badge" id="todayDateLabel"></div>
-          <div class="badge" id="currentTimeLabel"></div>
-        </div>
-        <div class="note">
-          規則：只有在指定時段內，才可以把項目從「未完成」點成「已完成」；完成後即鎖定，不可改回。
-        </div>
-      </div>
+<div class="card">
+<div id="taskList"></div>
+</div>
 
-      <div class="card">
-        <h2>今日 8 項工作</h2>
-        <div id="taskList"></div>
-      </div>
+<div class="card">
+<h3>今日摘要</h3>
+<textarea id="dailyDesc" style="width:100%"></textarea>
+<br><br>
+<button onclick="saveDesc()">儲存</button>
+</div>
 
-      <div class="card">
-        <h2>今日摘要說明</h2>
-        <textarea id="dailyDesc" placeholder="例如：今天已完成客廳清潔、洗衣、晚餐準備。下午 15:00 完成浴室消毒。"></textarea>
-        <div style="margin-top:10px;">
-          <button id="saveDescBtn">儲存今日摘要</button>
-        </div>
-        <div class="note">
-          此摘要會跟今天的 8 項狀態一起保存到 cookie，保存期限 1 年。
-        </div>
-      </div>
-    </div>
+<div class="card">
+<h3>摘要列表</h3>
+<div id="summary"></div>
+</div>
 
-    <div id="summaryPage" style="display:none;">
-      <div class="card">
-        <h2>每日摘要列表</h2>
-        <div class="muted">日期新的在上面，例如昨天會排在前面。</div>
-      </div>
-      <div id="summaryList"></div>
-    </div>
+</div>
 
-    <div class="footer-note">
-      注意：此版本使用 cookie，瀏覽器 cookie 容量有限。若歷史資料很多，系統會自動刪除最舊資料，避免 cookie 爆掉。
-    </div>
-  </div>
+<div class="version-badge" id="appVersionLabel"></div>
 
-  <script>
-    /**********************
-     * 1) 基本設定
-     **********************/
-    const TASKS = [
-      { id: 1, name: "整理客廳", start: "08:00", end: "09:00" },
-      { id: 2, name: "打掃臥室", start: "09:00", end: "10:00" },
-      { id: 3, name: "清潔浴室", start: "10:00", end: "11:00" },
-      { id: 4, name: "整理隨身碟", start: "13:00", end: "23:59" },
-      { id: 5, name: "喝咖啡", start: "13:00", end: "18:00" },
-      { id: 6, name: "遛狗", start: "14:00", end: "23:59" },
-      { id: 7, name: "晚餐備料", start: "17:00", end: "23:59" },
-      { id: 8, name: "整理床鋪", start: "21:00", end: "23:59" }
-    ];
+<script>
 
-    const COOKIE_NAME = "maidDailyReport";
-    const COOKIE_EXPIRE_DAYS = 365;
+/*******************
+ VERSION CONTROL
+*******************/
+const APP_VERSION = "v2";  // ⭐改這裡即可清cookie
+const VERSION_COOKIE = "maidAppVersion";
 
-    /**********************
-     * 2) cookie 工具
-     **********************/
-    function setCookie(name, value, days) {
-      const date = new Date();
-      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-      const expires = "expires=" + date.toUTCString();
-      document.cookie = name + "=" + encodeURIComponent(value) + ";" + expires + ";path=/;SameSite=Lax";
-    }
+/*******************
+ CONFIG
+*******************/
+const COOKIE_NAME = "maidData";
+const EXPIRE = 365;
 
-    function getCookie(name) {
-      const target = name + "=";
-      const arr = document.cookie.split(";");
-      for (let c of arr) {
-        c = c.trim();
-        if (c.indexOf(target) === 0) {
-          return decodeURIComponent(c.substring(target.length));
-        }
-      }
-      return null;
-    }
+const TASKS = [
 
-    /**********************
-     * 3) 日期/時間工具
-     **********************/
-    function pad2(n) {
-      return String(n).padStart(2, "0");
-    }
+{ id: 1, name: "整理客廳", start: "08:00", end: "09:00" },
+{ id: 2, name: "打掃臥室", start: "09:00", end: "10:00" },
+{ id: 3, name: "清潔浴室", start: "10:00", end: "11:00" },
+{ id: 4, name: "整理隨身碟", start: "13:00", end: "23:59" },
+{ id: 5, name: "喝咖啡", start: "13:00", end: "18:00" },
+{ id: 6, name: "遛狗", start: "14:00", end: "23:59" },
+{ id: 7, name: "晚餐備料", start: "17:00", end: "23:59" },
+{ id: 8, name: "整理床鋪", start: "21:00", end: "23:59" }
 
-    function getTodayKey() {
-      const now = new Date();
-      return `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`;
-    }
+];
 
-    function formatDateText(dateKey) {
-      const d = new Date(dateKey + "T00:00:00");
-      const weekNames = ["日", "一", "二", "三", "四", "五", "六"];
-      return `${d.getFullYear()}/${pad2(d.getMonth() + 1)}/${pad2(d.getDate())} (週${weekNames[d.getDay()]})`;
-    }
+/*******************
+ COOKIE
+*******************/
+function setCookie(name,value,days){
+let d=new Date();
+d.setTime(d.getTime()+days*86400000);
+document.cookie=name+"="+encodeURIComponent(value)+";expires="+d.toUTCString()+";path=/";
+}
 
-    function getCurrentHHMM() {
-      const now = new Date();
-      return `${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
-    }
+function getCookie(name){
+let n=name+"=";
+let arr=document.cookie.split(";");
+for(let c of arr){
+c=c.trim();
+if(c.indexOf(n)==0) return decodeURIComponent(c.substring(n.length));
+}
+return null;
+}
 
-    function hhmmToMinutes(hhmm) {
-      const [h, m] = hhmm.split(":").map(Number);
-      return h * 60 + m;
-    }
+function clearCookie(name){
+document.cookie=name+"=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
+}
 
-    function isInTimeRange(nowHHMM, startHHMM, endHHMM) {
-      const now = hhmmToMinutes(nowHHMM);
-      const start = hhmmToMinutes(startHHMM);
-      const end = hhmmToMinutes(endHHMM);
-      return now >= start && now <= end;
-    }
+/*******************
+ VERSION CHECK
+*******************/
+function checkVersion(){
+let v=getCookie(VERSION_COOKIE);
+if(v!==APP_VERSION){
+clearCookie(COOKIE_NAME);
+setCookie(VERSION_COOKIE,APP_VERSION,EXPIRE);
+alert("系統更新，已清除舊資料");
+}
+}
 
-    /**********************
-     * 4) 資料讀寫
-     * 結構：
-     * {
-     *   "2026-03-18": {
-     *      desc: "...",
-     *      tasks: { "1": true, "2": false ... }
-     *   }
-     * }
-     **********************/
-    function loadAllData() {
-      const raw = getCookie(COOKIE_NAME);
-      if (!raw) return {};
-      try {
-        const obj = JSON.parse(raw);
-        if (obj && typeof obj === "object") return obj;
-        return {};
-      } catch (e) {
-        return {};
-      }
-    }
+/*******************
+ TIME
+*******************/
+function nowHHMM(){
+let d=new Date();
+return d.getHours()*60+d.getMinutes();
+}
 
-    function saveAllData(data) {
-      let json = JSON.stringify(data);
+function toMin(t){
+let [h,m]=t.split(":");
+return Number(h)*60+Number(m);
+}
 
-      // cookie 太大時，自動刪除最舊的日期資料
-      // 一般瀏覽器單一 cookie 大約 4KB 左右，這裡保守控制
-      while (json.length > 3500) {
-        const keys = Object.keys(data).sort(); // 舊的在前
-        if (keys.length === 0) break;
-        delete data[keys[0]];
-        json = JSON.stringify(data);
-      }
+/*******************
+ DATA
+*******************/
+function load(){
+let d=getCookie(COOKIE_NAME);
+return d?JSON.parse(d):{};
+}
 
-      setCookie(COOKIE_NAME, json, COOKIE_EXPIRE_DAYS);
-    }
+function save(d){
+setCookie(COOKIE_NAME,JSON.stringify(d),EXPIRE);
+}
 
-    function ensureTodayRecord() {
-      const data = loadAllData();
-      const today = getTodayKey();
+function today(){
+let d=new Date();
+return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
+}
 
-      if (!data[today]) {
-        data[today] = {
-          desc: "",
-          tasks: {}
-        };
-        TASKS.forEach(t => {
-          data[today].tasks[String(t.id)] = false;
-        });
-        saveAllData(data);
-      } else {
-        // 若舊資料缺欄位，補上
-        if (!data[today].tasks) data[today].tasks = {};
-        TASKS.forEach(t => {
-          if (typeof data[today].tasks[String(t.id)] !== "boolean") {
-            data[today].tasks[String(t.id)] = false;
-          }
-        });
-        if (typeof data[today].desc !== "string") {
-          data[today].desc = "";
-        }
-        saveAllData(data);
-      }
-    }
+/*******************
+ CORE
+*******************/
+function markDone(id){
+let data=load();
+let t=today();
 
-    function markTaskDone(taskId) {
-      const data = loadAllData();
-      const today = getTodayKey();
-      const record = data[today];
-      if (!record) return;
+if(!data[t]) return;
 
-      const task = TASKS.find(t => t.id === taskId);
-      if (!task) return;
+let now=nowHHMM();
+let task=TASKS.find(x=>x.id==id);
 
-      const nowHHMM = getCurrentHHMM();
+if(data[t][id]?.done) return;
 
-      if (record.tasks[String(taskId)] === true) {
-        alert("此項目已完成並鎖定，不能改回。");
-        return;
-      }
+if(now<toMin(task.start)||now>toMin(task.end)){
+alert("不在時間內");
+return;
+}
 
-      if (!isInTimeRange(nowHHMM, task.start, task.end)) {
-        alert(`現在不是可操作時段。\n此項目只能在 ${task.start} ~ ${task.end} 點擊完成。`);
-        return;
-      }
+data[t][id]={done:true,time:new Date().toLocaleTimeString()};
+save(data);
+render();
+}
 
-      record.tasks[String(taskId)] = true;
-      saveAllData(data);
-      renderToday();
-      renderSummary();
-    }
+/*******************
+ RENDER
+*******************/
+function render(){
 
-    function saveTodayDesc() {
-      const data = loadAllData();
-      const today = getTodayKey();
-      if (!data[today]) return;
+let data=load();
+let t=today();
 
-      data[today].desc = document.getElementById("dailyDesc").value.trim();
-      saveAllData(data);
-      alert("今日摘要已儲存。");
-      renderSummary();
-    }
+if(!data[t]){
+data[t]={};
+TASKS.forEach(x=>data[t][x.id]={done:false});
+save(data);
+}
 
-    /**********************
-     * 5) UI Render
-     **********************/
-    function renderToday() {
-      ensureTodayRecord();
+let html="";
 
-      const today = getTodayKey();
-      const nowHHMM = getCurrentHHMM();
-      const data = loadAllData();
-      const record = data[today];
+TASKS.forEach(task=>{
+let state=data[t][task.id];
+let now=nowHHMM();
 
-      document.getElementById("todayDateLabel").textContent = "今天：" + formatDateText(today);
-      document.getElementById("currentTimeLabel").textContent = "目前時間：" + nowHHMM;
+let text="未完成";
+let cls="btn-pending";
+let disabled=true;
 
-      document.getElementById("dailyDesc").value = record.desc || "";
+if(state.done){
+text="已完成";
+cls="btn-done";
+}
+else if(now>=toMin(task.start)&&now<=toMin(task.end)){
+text="完成";
+cls="btn-open";
+disabled=false;
+}
 
-      const taskList = document.getElementById("taskList");
-      taskList.innerHTML = "";
+html+=`
+<div class="task-row">
+<div>${task.name}<br>${task.start}-${task.end}</div>
+<div>
+<button class="task-btn ${cls}" ${disabled?"disabled":""}
+onclick="markDone(${task.id})">${text}</button>
+</div>
+</div>`;
+});
 
-      TASKS.forEach(task => {
-        const done = record.tasks[String(task.id)] === true;
-        const inRange = isInTimeRange(nowHHMM, task.start, task.end);
+document.getElementById("taskList").innerHTML=html;
 
-        let statusHtml = "";
-        let buttonDisabled = false;
-        let noteText = "";
+renderSummary();
+}
 
-        if (done) {
-          statusHtml = `<span class="status done">已完成（已鎖定）</span>`;
-          buttonDisabled = true;
-          noteText = "此項目已完成，不可再修改";
-        } else {
-          if (inRange) {
-            statusHtml = `<span class="status undone">未完成（可點擊）</span>`;
-            buttonDisabled = false;
-            noteText = `現在在可操作時段 ${task.start} ~ ${task.end}`;
-          } else {
-            statusHtml = `<span class="status locked">未完成（未到或已過時段）</span>`;
-            buttonDisabled = true;
-            noteText = `只能在 ${task.start} ~ ${task.end} 點擊完成`;
-          }
-        }
+/*******************
+ SUMMARY
+*******************/
+function saveDesc(){
+let data=load();
+let t=today();
+if(!data[t]) data[t]={};
 
-        const row = document.createElement("div");
-        row.className = "task-row";
-        row.innerHTML = `
-          <div>
-            <div class="task-name">${task.id}. ${task.name}</div>
-            <div class="muted">時段：${task.start} ~ ${task.end}</div>
-          </div>
-          <div>${statusHtml}</div>
-          <div class="muted">${noteText}</div>
-          <div>
-            <button class="task-btn" ${buttonDisabled ? "disabled" : ""} data-task-id="${task.id}">
-              完成
-            </button>
-          </div>
-        `;
-        taskList.appendChild(row);
-      });
+data[t].desc=document.getElementById("dailyDesc").value;
+save(data);
+renderSummary();
+}
 
-      document.querySelectorAll(".task-btn").forEach(btn => {
-        btn.addEventListener("click", function () {
-          const taskId = Number(this.getAttribute("data-task-id"));
-          markTaskDone(taskId);
-        });
-      });
-    }
+function renderSummary(){
+let data=load();
+let keys=Object.keys(data).reverse();
 
-    function renderSummary() {
-      const data = loadAllData();
-      const keys = Object.keys(data).sort((a, b) => b.localeCompare(a)); // 新的在上面
-      const summaryList = document.getElementById("summaryList");
-      summaryList.innerHTML = "";
+let html="";
 
-      if (keys.length === 0) {
-        summaryList.innerHTML = `<div class="card">尚無資料</div>`;
-        return;
-      }
+keys.forEach(k=>{
+let d=data[k];
+html+=`<div class="card">
+<b>${k}</b><br>
+${d.desc||""}
+</div>`;
+});
 
-      keys.forEach(dateKey => {
-        const record = data[dateKey];
-        const doneCount = TASKS.filter(t => record.tasks && record.tasks[String(t.id)] === true).length;
+document.getElementById("summary").innerHTML=html;
+}
 
-        const card = document.createElement("div");
-        card.className = "card summary-item";
+/*******************
+ INIT
+*******************/
+checkVersion();
 
-        let taskHtml = `<ul class="mini-list">`;
-        TASKS.forEach(task => {
-          const done = record.tasks && record.tasks[String(task.id)] === true;
-          taskHtml += `<li class="${done ? 'ok' : 'no'}">${task.name}：${done ? '已完成' : '未完成'}</li>`;
-        });
-        taskHtml += `</ul>`;
+document.getElementById("appVersionLabel").innerText="v"+APP_VERSION;
 
-        card.innerHTML = `
-          <div class="summary-date">${formatDateText(dateKey)}</div>
-          <div>完成數：<strong>${doneCount} / ${TASKS.length}</strong></div>
-          <div class="summary-desc">${record.desc ? record.desc : "（無摘要說明）"}</div>
-          ${taskHtml}
-        `;
-        summaryList.appendChild(card);
-      });
-    }
+render();
 
-    /**********************
-     * 6) 分頁切換
-     **********************/
-    function showTodayPage() {
-      document.getElementById("todayPage").style.display = "";
-      document.getElementById("summaryPage").style.display = "none";
-      document.getElementById("tabToday").classList.add("active");
-      document.getElementById("tabToday").classList.remove("secondary");
-      document.getElementById("tabSummary").classList.remove("active");
-      document.getElementById("tabSummary").classList.add("secondary");
-    }
-
-    function showSummaryPage() {
-      document.getElementById("todayPage").style.display = "none";
-      document.getElementById("summaryPage").style.display = "";
-      document.getElementById("tabSummary").classList.add("active");
-      document.getElementById("tabSummary").classList.remove("secondary");
-      document.getElementById("tabToday").classList.remove("active");
-      document.getElementById("tabToday").classList.add("secondary");
-    }
-
-    /**********************
-     * 7) 初始化
-     **********************/
-    document.getElementById("tabToday").addEventListener("click", showTodayPage);
-    document.getElementById("tabSummary").addEventListener("click", showSummaryPage);
-    document.getElementById("saveDescBtn").addEventListener("click", saveTodayDesc);
-
-    ensureTodayRecord();
-    renderToday();
-    renderSummary();
-
-    // 每分鐘刷新一次，讓按鈕可否點擊狀態跟著時間更新
-    setInterval(() => {
-      renderToday();
-    }, 60000);
-  </script>
+</script>
 </body>
 </html>
