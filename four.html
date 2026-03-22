@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Year Reminder</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      margin: 0;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .line {
+      font-size: 24px;
+      line-height: 1.8;
+      border-bottom: 1px solid #eee;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      white-space: pre;
+    }
+
+    .line:last-child {
+      border-bottom: none;
+    }
+
+    .label {
+      width: 140px;
+      color: #555;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .value {
+      color: #111;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="line"><span class="label">Today</span><span id="today" class="value"></span></div>
+    <div class="line"><span class="label">100 years ago</span><span id="y100" class="value"></span></div>
+    <div class="line"><span class="label">85 years ago</span><span id="y85" class="value"></span></div>
+    <div class="line"><span class="label">40 years ago</span><span id="y40" class="value"></span></div>
+  </div>
+
+  <script>
+    const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    function pad(n) {
+      return String(n).padStart(2, "0");
+    }
+
+    function formatDate(date) {
+      return date.getFullYear() + "-" +
+             pad(date.getMonth() + 1) + "-" +
+             pad(date.getDate()) + " " +
+             WEEKDAYS[date.getDay()];
+    }
+
+    function getSameMonthDayOrBlank(baseDate, yearsAgo) {
+      const targetYear = baseDate.getFullYear() - yearsAgo;
+      const month = baseDate.getMonth(); // 0-based
+      const day = baseDate.getDate();
+
+      const candidate = new Date(targetYear, month, day);
+
+      // 驗證是否仍是同一個年月日，避免 2/29 自動跳成 3/1
+      if (
+        candidate.getFullYear() !== targetYear ||
+        candidate.getMonth() !== month ||
+        candidate.getDate() !== day
+      ) {
+        return "";
+      }
+
+      return formatDate(candidate);
+    }
+
+    const today = new Date();
+
+    document.getElementById("today").textContent = formatDate(today);
+    document.getElementById("y100").textContent = getSameMonthDayOrBlank(today, 100);
+    document.getElementById("y85").textContent = getSameMonthDayOrBlank(today, 85);
+    document.getElementById("y40").textContent = getSameMonthDayOrBlank(today, 40);
+  </script>
+</body>
+</html>
