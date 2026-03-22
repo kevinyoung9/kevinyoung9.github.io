@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Desk Calendar Reminder</title>
+  <style>
+    :root {
+      --bg: #f3efe6;
+      --board: #fffaf0;
+      --border: #d8cdb8;
+      --text: #2f2a24;
+      --muted: #7a6f62;
+      --accent: #a63d40;
+      --shadow: rgba(0, 0, 0, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(to bottom, #f8f4ea, #efe7d8);
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .board {
+      width: min(920px, 100%);
+      background: var(--board);
+      border: 3px solid var(--border);
+      border-radius: 22px;
+      box-shadow: 0 10px 30px var(--shadow);
+      overflow: hidden;
+    }
+
+    .header {
+      text-align: center;
+      padding: 22px 20px 14px;
+      font-size: clamp(20px, 3vw, 32px);
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--muted);
+      border-bottom: 2px solid var(--border);
+      background: linear-gradient(to bottom, #fffdf7, #f7f1e5);
+    }
+
+    .rows {
+      padding: 20px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      align-items: center;
+      min-height: 110px;
+      border-bottom: 2px dashed #d9cfbd;
+      padding: 10px 8px;
+    }
+
+    .row:last-child {
+      border-bottom: none;
+    }
+
+    .label {
+      font-size: clamp(22px, 2.6vw, 36px);
+      font-weight: 700;
+      color: var(--muted);
+      text-align: center;
+      padding: 10px;
+    }
+
+    .value {
+      font-size: clamp(28px, 4vw, 56px);
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-align: center;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .today .label,
+    .today .value {
+      color: var(--accent);
+    }
+
+    .empty {
+      color: #c8bfb2;
+    }
+
+    @media (max-width: 700px) {
+      .row {
+        grid-template-columns: 1fr;
+        min-height: 120px;
+        padding: 14px 6px;
+      }
+
+      .label {
+        padding-bottom: 4px;
+      }
+
+      .value {
+        padding-top: 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="board">
+    <div class="header">DESK CALENDAR REMINDER</div>
+
+    <div class="rows">
+      <div class="row today">
+        <div class="label">Today</div>
+        <div id="today" class="value"></div>
+      </div>
+
+      <div class="row">
+        <div class="label">100 Years Ago</div>
+        <div id="y100" class="value"></div>
+      </div>
+
+      <div class="row">
+        <div class="label">85 Years Ago</div>
+        <div id="y85" class="value"></div>
+      </div>
+
+      <div class="row">
+        <div class="label">40 Years Ago</div>
+        <div id="y40" class="value"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    function pad(n) {
+      return String(n).padStart(2, "0");
+    }
+
+    function formatDate(date) {
+      return (
+        date.getFullYear() + "-" +
+        pad(date.getMonth() + 1) + "-" +
+        pad(date.getDate()) + " " +
+        WEEKDAYS[date.getDay()]
+      );
+    }
+
+    function getSameMonthDayOrBlank(baseDate, yearsAgo) {
+      const targetYear = baseDate.getFullYear() - yearsAgo;
+      const month = baseDate.getMonth();
+      const day = baseDate.getDate();
+
+      const candidate = new Date(targetYear, month, day);
+
+      if (
+        candidate.getFullYear() !== targetYear ||
+        candidate.getMonth() !== month ||
+        candidate.getDate() !== day
+      ) {
+        return "";
+      }
+
+      return formatDate(candidate);
+    }
+
+    function setLine(id, text) {
+      const el = document.getElementById(id);
+      if (text === "") {
+        el.textContent = "";
+        el.classList.add("empty");
+      } else {
+        el.textContent = text;
+        el.classList.remove("empty");
+      }
+    }
+
+    const today = new Date();
+
+    setLine("today", formatDate(today));
+    setLine("y100", getSameMonthDayOrBlank(today, 100));
+    setLine("y85", getSameMonthDayOrBlank(today, 85));
+    setLine("y40", getSameMonthDayOrBlank(today, 40));
+  </script>
+</body>
+</html>
